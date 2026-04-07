@@ -1,4 +1,5 @@
 using ECommerce528.Models;
+using ECommerce528.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -26,6 +27,39 @@ namespace ECommerce528.Controllers
             products = products.Skip(0).Take(8);
 
             return View(products.AsEnumerable());
+        }
+
+        public IActionResult Details([FromRoute] int id)
+        {
+            var product = _context.Products
+                .Include(e => e.Category)
+                .SingleOrDefault(e => e.Id == id);
+
+            if (product is null) return NotFound();
+
+            /*
+             * 
+             * SELECT *
+             * FROM products
+             * WHERE categoryId = product.categoryId
+             * 
+             */
+
+            var relatedProducts = _context.Products
+                .Include(e => e.Category)
+                .Where(e => e.CategoryId == product.CategoryId && e.Id != id)
+                .Skip(0)
+                .Take(4);
+
+            // TODO
+            // 1. Select Product has contain the same name
+            // 2. Select product in the same price range (+30% || -30%)
+
+            return View(new ProductWithRelatedVM()
+            {
+                Product = product,
+                RelatedProducts = relatedProducts
+            });
         }
 
         public IActionResult Privacy()
