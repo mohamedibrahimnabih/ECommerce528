@@ -1,11 +1,10 @@
-using ECommerce528.Models;
-using ECommerce528.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 
-namespace ECommerce528.Controllers
+namespace ECommerce528.Areas.Customer.Controllers
 {
+    [Area(SD.CUSTOMER_AREA)]
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext _context;// = new ApplicationDbContext();
