@@ -19,6 +19,7 @@
   <ItemGroup>
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\ChatApp\Controllers\" />
+    <Folder Include="wwwroot\images\brand_logo\" />
   </ItemGroup>
 
 </Project>

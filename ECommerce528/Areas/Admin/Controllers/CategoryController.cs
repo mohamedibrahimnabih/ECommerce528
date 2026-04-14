@@ -18,7 +18,7 @@ namespace ECommerce528.Areas.Admin.Controllers
 
             // Filter
             if(query is not null)
-                categories = categories.Where(e => e.Name.Contains(query));
+                categories = categories.Where(e => e.Name.ToLower().Contains(query.ToLower().Trim()));
 
             // Pagination
             int totalPages = (int)Math.Ceiling(categories.Count() / 5.0);
