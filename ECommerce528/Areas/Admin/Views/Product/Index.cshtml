@@ -1,0 +1,187 @@
+﻿@model ProductWithRelatedVM
+
+@{
+    const int MIN_QUANTITY = 50;
+}
+
+<div class="container">
+    <div class="row mb-3 align-items-center my-3">
+        <div class="col-md-6">
+            <h2 class="display-6">All Products</h2>
+        </div>
+        <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
+            <a href="/Admin/Product/Create" class="btn btn-success"><i class="bi bi-plus-circle"></i> Create</a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <section class="py-3 filter-bar">
+        <div class="container">
+            <div class="row" style="background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;">
+                <div class="col-12">
+                    <form>
+                        <div class="row my-2">
+                            <!-- Product Name -->
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" placeholder="Name" name="query" value="@Model.Query">
+                            </div>
+
+                            <!-- Min Price -->
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" placeholder="Min Price" name="MinPrice">
+                            </div>
+
+                            <!-- Max Price -->
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" placeholder="Min Price" name="MaxPrice">
+                            </div>
+                        </div>
+
+                        <div class="row my-2">
+                            <!-- Category Id -->
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" placeholder="Category Id" name="CategoryId">
+                            </div>
+
+                            <!-- Brand Id -->
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" placeholder="Brand Id" name="BrandId">
+                            </div>
+
+                            <!-- Low Quantity -->
+                            <div class="col-md-3">
+                                <input type="checkbox" class="form-check-input" placeholder="Low Quantity" name="LowQuantity" value="true">
+                                <label for="LowQuantity">Low Quantity</label>
+                            </div>
+                        </div>
+
+                        <div class="row my-2">
+                            <!-- Submit Button -->
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-dark w-100">Filter</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Category Name</th>
+                        <th scope="col">Brand Name</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var item in Model.Products)
+                    {
+                        <tr>
+                            <th scope="row">@item.Id</th>
+                            <td>@item.Name</td>
+                            <td>@item.Price.ToString("c")</td>
+                            @if (item.Quantity > MIN_QUANTITY)
+                            {
+                                <td><span class="badge text-bg-success">@item.Quantity</span></td>
+                            }
+                            else
+                            {
+                                <td><span class="badge text-bg-danger">@item.Quantity</span></td>
+                            }
+                            <td><span class="badge text-bg-info">@item.Category.Name</span></td>
+                            <td><span class="badge text-bg-info">@item.Brand.Name</span></td>
+                            @if(item.Status)
+                            {
+                                <td><span class="badge text-bg-success">Active</span></td>
+                            }
+                            else
+                            {
+                                <td><span class="badge text-bg-danger">In Active</span></td>
+                            }
+                            <td>
+                                <a href="/Admin/Product/Detail/@item.Id" type="button" class="btn btn-info"><i class="bi bi-eye"></i> Details</a>
+                                <a href="/Admin/Product/Update/@item.Id" type="button" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a>
+                                <a href="/Admin/Product/Delete/@item.Id" class="btn btn-danger btn-delete"><i class="bi bi-trash"></i> Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+            <nav aria-label="Page navigation example">
+                <nav aria-label="...">
+                    <ul class="pagination">
+                        @if(Model.CurrentPage > 1)
+                        {
+                            <li class="page-item"><a href="/Admin/Product/Index?page=@(Model.CurrentPage - 1)" class="page-link">Previous</a></li>
+                        }
+                        @for(var i = 1; i<=Model.TotalPages;i++)
+                        {
+                            if(Model.CurrentPage == i)
+                            {
+                                <li class="page-item active"><a class="page-link" href="/Admin/Product/Index?page=@i">@i</a></li>
+                            }
+                            else
+                            {
+                                <li class="page-item"><a class="page-link" href="/Admin/Product/Index?page=@i">@i</a></li>
+                            }
+                        }
+                        @if(Model.CurrentPage != Model.TotalPages)
+                        {
+                            <li class="page-item"><a class="page-link" href="/Admin/Product/Index?page=@(Model.CurrentPage + 1)">Next</a></li>
+                        }
+                    </ul>
+                </nav>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const deleteButtons = document.querySelectorAll(".btn-delete");
+
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault(); // stop normal navigation
+
+                const url = this.getAttribute("href");
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This action cannot be undone!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                          title: "Deleted!",
+                          text: "Your Product has been deleted.",
+                          icon: "success"
+                        }, 3000);
+
+                        // Redirect to delete URL
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+    });
+</script> 

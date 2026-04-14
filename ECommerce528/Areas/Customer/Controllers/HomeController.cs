@@ -57,7 +57,7 @@ namespace ECommerce528.Areas.Customer.Controllers
             return View(new ProductWithRelatedVM()
             {
                 Product = product,
-                RelatedProducts = relatedProducts
+                Products = relatedProducts
             });
         }
 

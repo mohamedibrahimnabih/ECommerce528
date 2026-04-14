@@ -96,6 +96,7 @@ namespace ECommerce528.Areas.Admin.Controllers
                 brand.Logo = brandInDb.Logo;
 
             _context.Brands.Update(brand);
+
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
