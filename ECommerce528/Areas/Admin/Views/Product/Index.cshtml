@@ -4,6 +4,10 @@
     const int MIN_QUANTITY = 50;
 }
 
+@section Scripts {
+    <partial name="_NotificationPartial">
+}
+
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
@@ -28,29 +32,56 @@
 
                             <!-- Min Price -->
                             <div class="col-md-3">
-                                <input type="text" class="form-control" placeholder="Min Price" name="MinPrice">
+                                <input type="text" class="form-control" placeholder="Min Price" name="MinPrice" value="@ViewBag.MinPrice">
                             </div>
 
                             <!-- Max Price -->
                             <div class="col-md-3">
-                                <input type="text" class="form-control" placeholder="Min Price" name="MaxPrice">
+                                <input type="text" class="form-control" placeholder="Max Price" name="MaxPrice" value="@ViewBag.MaxPrice">
                             </div>
                         </div>
 
                         <div class="row my-2">
                             <!-- Category Id -->
                             <div class="col-md-3">
-                                <input type="text" class="form-control" placeholder="Category Id" name="CategoryId">
+                                @* <input type="number" class="form-control" placeholder="Category Id" name="CategoryId" value="@ViewBag.CategoryId"> *@
+                                <select name="CategoryId" class="form-select">
+                                    @foreach (var item in Model.Categories)
+                                    {
+                                        if (item.Id == @ViewBag.CategoryId)
+                                        {
+                                            <option value="@item.Id" selected>@item.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Id">@item.Name</option>
+                                        }
+                                    }
+                                </select>
                             </div>
 
                             <!-- Brand Id -->
                             <div class="col-md-3">
-                                <input type="text" class="form-control" placeholder="Brand Id" name="BrandId">
+                                @* <input type="number" class="form-control" placeholder="Brand Id" name="BrandId" value="@ViewBag.BrandId"> *@
+                                <select name="BrandId" class="form-select">
+                                    @foreach (var item in Model.Brands)
+                                    {
+                                        if (item.Id == @ViewBag.BrandId)
+                                        {
+                                                
+                                            <option value="@item.Id" selected>@item.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.Id">@item.Name</option>
+                                        }
+                                    }
+                                </select>
                             </div>
 
                             <!-- Low Quantity -->
                             <div class="col-md-3">
-                                <input type="checkbox" class="form-check-input" placeholder="Low Quantity" name="LowQuantity" value="true">
+                                <input type="checkbox" class="form-check-input" placeholder="Low Quantity" name="LowQuantity" value="@ViewBag.BrandId">
                                 <label for="LowQuantity">Low Quantity</label>
                             </div>
                         </div>
@@ -83,7 +114,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var item in Model.Products)
+                    @foreach (var item in Model.Products)
                     {
                         <tr>
                             <th scope="row">@item.Id</th>
@@ -99,7 +130,7 @@
                             }
                             <td><span class="badge text-bg-info">@item.Category.Name</span></td>
                             <td><span class="badge text-bg-info">@item.Brand.Name</span></td>
-                            @if(item.Status)
+                            @if (item.Status)
                             {
                                 <td><span class="badge text-bg-success">Active</span></td>
                             }
@@ -124,13 +155,13 @@
             <nav aria-label="Page navigation example">
                 <nav aria-label="...">
                     <ul class="pagination">
-                        @if(Model.CurrentPage > 1)
+                        @if (Model.CurrentPage > 1)
                         {
                             <li class="page-item"><a href="/Admin/Product/Index?page=@(Model.CurrentPage - 1)" class="page-link">Previous</a></li>
                         }
-                        @for(var i = 1; i<=Model.TotalPages;i++)
+                        @for (var i = 1; i <= Model.TotalPages; i++)
                         {
-                            if(Model.CurrentPage == i)
+                            if (Model.CurrentPage == i)
                             {
                                 <li class="page-item active"><a class="page-link" href="/Admin/Product/Index?page=@i">@i</a></li>
                             }
@@ -139,7 +170,7 @@
                                 <li class="page-item"><a class="page-link" href="/Admin/Product/Index?page=@i">@i</a></li>
                             }
                         }
-                        @if(Model.CurrentPage != Model.TotalPages)
+                        @if (Model.CurrentPage != Model.TotalPages)
                         {
                             <li class="page-item"><a class="page-link" href="/Admin/Product/Index?page=@(Model.CurrentPage + 1)">Next</a></li>
                         }

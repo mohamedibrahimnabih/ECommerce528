@@ -9,6 +9,13 @@ namespace ECommerce528
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.Name = ".AdventureWorks.Session";
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.IsEssential = true;
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -23,6 +30,8 @@ namespace ECommerce528
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.MapStaticAssets();
             app.MapControllerRoute(

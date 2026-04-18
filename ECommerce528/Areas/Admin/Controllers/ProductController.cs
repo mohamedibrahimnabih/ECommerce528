@@ -28,21 +28,34 @@ namespace ECommerce528.Areas.Admin.Controllers
                 products = products.Where(e => e.Name.ToLower().Contains(productFilterVM.query.ToLower().Trim()));
 
             if(productFilterVM.minPrice is not null)
+            {
                 products = products.Where(e => e.Price >= productFilterVM.minPrice);
+                ViewBag.minPrice = productFilterVM.minPrice;
+            }
 
             if (productFilterVM.maxPrice is not null)
+            {
                 products = products.Where(e => e.Price <= productFilterVM.maxPrice);
+                ViewBag.maxPrice = productFilterVM.maxPrice;
+            }
 
             if (productFilterVM.categoryId is not null)
+            {
                 products = products.Where(e => e.CategoryId == productFilterVM.categoryId);
+                ViewBag.categoryId = productFilterVM.categoryId;
+            }
 
             if (productFilterVM.brandId is not null)
-                products = products.Where(e => e.CategoryId == productFilterVM.brandId);
+            {
+                products = products.Where(e => e.BrandId == productFilterVM.brandId);
+                ViewBag.brandId = productFilterVM.brandId;
+            }
 
-            if(productFilterVM.lowQuantity)
+            if (productFilterVM.lowQuantity)
+            {
                 products = products.OrderBy(e => e.Quantity);
-
-            // TODO: save user filters
+                ViewBag.lowQuantity = productFilterVM.lowQuantity;
+            }
 
             // Pagination
             int totalPages = (int)Math.Ceiling(products.Count() / 5.0);
@@ -53,33 +66,62 @@ namespace ECommerce528.Areas.Admin.Controllers
                 Products = products.AsEnumerable(),
                 TotalPages = totalPages,
                 CurrentPage = page,
-                Query = productFilterVM.query
+                Query = productFilterVM.query,
+                Categories = _context.Categories.AsEnumerable(),
+                Brands = _context.Brands.AsEnumerable(),
             });
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new UpsertProductVM()
+            {
+                Categories = _context.Categories.AsEnumerable(),
+                Brands = _context.Brands.AsEnumerable(),
+            });
         }
 
         [HttpPost]
-        public IActionResult Create(Product product, IFormFile logo /*logo.png*/) // string name, string Description, bool status
+        public IActionResult Create(Product product, IFormFile mainImg, List<IFormFile> subImgs) 
         {
-            if(logo is not null && logo.Length > 0)
+            if(mainImg is not null && mainImg.Length > 0)
             {
-                // Save Logo in wwwroot
-                var fileName = _productService.SaveImg(logo);
+                // Save Main Img in wwwroot
+                var fileName = _productService.SaveImg(mainImg);
 
                 if(fileName is not null)
                 {
-                    // Save Logo name in DB
+                    // Save Main Img name in DB
                     product.MainImg = fileName;
                 }
             }
 
             _context.Products.Add(product);
             _context.SaveChanges();
+
+            if(subImgs.Any())
+            {
+                foreach (var item in subImgs)
+                {
+                    if (item is not null && item.Length > 0)
+                    {
+                        var fileName = _productService.SaveImg(item, ProductImgType.SubImg);
+
+                        if (fileName is not null)
+                        {
+                            _context.ProductSubImgs.Add(new()
+                            {
+                                SubImg = fileName,
+                                ProductId = product.Id
+                            });
+                        }
+                    }
+                }
+            }
+            _context.SaveChanges();
+
+            TempData["success_notification"] = "Add Product Successfully";
 
             return RedirectToAction(nameof(Index));
         }
@@ -91,33 +133,68 @@ namespace ECommerce528.Areas.Admin.Controllers
 
             if (product is null) return NotFound();
 
-            return View(product);
+            return View(new UpsertProductVM()
+            {
+                Product = product,
+                ProductSubImgs = _context.ProductSubImgs.Where(e => e.ProductId == id),
+                Categories = _context.Categories.AsEnumerable(),
+                Brands = _context.Brands.AsEnumerable(),
+            });
         }
 
         [HttpPost]
-        public IActionResult Update(Product product, IFormFile? logo) // string name, string Description, bool status
+        public IActionResult Update(Product product, IFormFile? mainImg, List<IFormFile>? subImgs) // string name, string Description, bool status
         {
             var productInDb = _context.Products.AsNoTracking().SingleOrDefault(e => e.Id == product.Id);
 
             if (productInDb is null) return NotFound();
 
-            if(logo is not null && logo.Length > 0)
+            if(mainImg is not null && mainImg.Length > 0)
             {
-                // Save new Logo in wwwroot
-                var fileName = _productService.SaveImg(logo);
+                // Save new Main Img in wwwroot
+                var fileName = _productService.SaveImg(mainImg);
 
-                // Remove old Logo from wwwroot
+                // Remove old Main Img from wwwroot
                 _productService.RemoveImg(productInDb.MainImg);
 
-                // Save new Logo in DB
+                // Save new Main Img in DB
                 if (fileName is not null) product.MainImg = fileName;
             }
             else
                 product.MainImg = productInDb.MainImg;
 
             _context.Products.Update(product);
-
             _context.SaveChanges();
+
+            if(subImgs is not null && subImgs.Any())
+            {
+                var productSubImgs = _context.ProductSubImgs.Where(e => e.ProductId == product.Id);
+
+                foreach (var item in productSubImgs)
+                    _productService.RemoveImg(item.SubImg, ProductImgType.SubImg);
+
+                _context.ProductSubImgs.RemoveRange(productSubImgs);
+
+                foreach (var item in subImgs)
+                {
+                    if (item is not null && item.Length > 0)
+                    {
+                        var fileName = _productService.SaveImg(item, ProductImgType.SubImg);
+
+                        if (fileName is not null)
+                        {
+                            _context.ProductSubImgs.Add(new()
+                            {
+                                SubImg = fileName,
+                                ProductId = product.Id
+                            });
+                        }
+                    }
+                }
+                _context.SaveChanges();
+            }
+
+            TempData["success_notification"] = "Update Product Successfully";
 
             return RedirectToAction(nameof(Index));
         }
@@ -128,11 +205,18 @@ namespace ECommerce528.Areas.Admin.Controllers
             
             if (product is null) return NotFound();
 
-            // Remove old Logo from wwwroot
+            var productSubImgs = _context.ProductSubImgs.Where(e => e.ProductId == product.Id);
+
+            foreach (var item in productSubImgs)
+                _productService.RemoveImg(item.SubImg, ProductImgType.SubImg);
+
+            // Remove old Main Img from wwwroot
             _productService.RemoveImg(product.MainImg);
 
             _context.Products.Remove(product);
             _context.SaveChanges();
+
+            TempData["success_notification"] = "Remove Product Successfully";
 
             return RedirectToAction(nameof(Index));
         }

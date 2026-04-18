@@ -1,5 +1,9 @@
 ﻿@model CategoryWithRelatedVM
 
+@section Scripts {
+    <partial name="_NotificationPartial">
+}
+
 <div class="container">
     <div class="row mb-3 align-items-center my-3">
         <div class="col-md-6">
@@ -45,12 +49,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach(var item in Model.Categories)
+                    @foreach (var item in Model.Categories)
                     {
                         <tr>
                             <th scope="row">@item.Id</th>
                             <td>@item.Name</td>
-                            @if(item.Status)
+                            @if (item.Status)
                             {
                                 <td><span class="badge text-bg-success">Active</span></td>
                             }
@@ -74,13 +78,13 @@
             <nav aria-label="Page navigation example">
                 <nav aria-label="...">
                     <ul class="pagination">
-                        @if(Model.CurrentPage > 1)
+                        @if (Model.CurrentPage > 1)
                         {
                             <li class="page-item"><a href="/Admin/Category/Index?page=@(Model.CurrentPage - 1)" class="page-link">Previous</a></li>
                         }
-                        @for(var i = 1; i<=Model.TotalPages;i++)
+                        @for (var i = 1; i <= Model.TotalPages; i++)
                         {
-                            if(Model.CurrentPage == i)
+                            if (Model.CurrentPage == i)
                             {
                                 <li class="page-item active"><a class="page-link" href="/Admin/Category/Index?page=@i">@i</a></li>
                             }
@@ -89,7 +93,7 @@
                                 <li class="page-item"><a class="page-link" href="/Admin/Category/Index?page=@i">@i</a></li>
                             }
                         }
-                        @if(Model.CurrentPage != Model.TotalPages)
+                        @if (Model.CurrentPage != Model.TotalPages)
                         {
                             <li class="page-item"><a class="page-link" href="/Admin/Category/Index?page=@(Model.CurrentPage + 1)">Next</a></li>
                         }

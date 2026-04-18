@@ -61,6 +61,8 @@ namespace ECommerce528.Areas.Admin.Controllers
             _context.Brands.Add(brand);
             _context.SaveChanges();
 
+            TempData["success_notification"] = "Add Brand Successfully";
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -96,8 +98,9 @@ namespace ECommerce528.Areas.Admin.Controllers
                 brand.Logo = brandInDb.Logo;
 
             _context.Brands.Update(brand);
-
             _context.SaveChanges();
+
+            TempData["success_notification"] = "Update Brand Successfully";
 
             return RedirectToAction(nameof(Index));
         }
@@ -113,6 +116,8 @@ namespace ECommerce528.Areas.Admin.Controllers
 
             _context.Brands.Remove(brand);
             _context.SaveChanges();
+
+            TempData["success_notification"] = "Remove Brand Successfully";
 
             return RedirectToAction(nameof(Index));
         }

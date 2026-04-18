@@ -20,7 +20,8 @@
     <Folder Include="Areas\Identity\Controllers\" />
     <Folder Include="Areas\ChatApp\Controllers\" />
     <Folder Include="wwwroot\images\brand_logo\" />
-    <Folder Include="wwwroot\images\product_logo\" />
+    <Folder Include="wwwroot\images\products\product_sub_imgs\" />
+    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>
