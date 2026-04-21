@@ -40,16 +40,28 @@ namespace ECommerce528.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new Brand());
         }
 
         [HttpPost]
-        public IActionResult Create(Brand brand, IFormFile logo /*logo.png*/) // string name, string Description, bool status
+        public IActionResult Create(CreateBrandVM createBrandVM) 
         {
-            if(logo is not null && logo.Length > 0)
+            //ModelState.Remove("logo");
+
+            Brand brand = new()
+            {
+                Name = createBrandVM.Name,
+                Description = createBrandVM.Description,
+                Status = createBrandVM.Status
+            };
+
+            if (!ModelState.IsValid)
+                return View(brand);
+
+            if (createBrandVM.Logo is not null && createBrandVM.Logo.Length > 0)
             {
                 // Save Logo in wwwroot
-                var fileName = _brandService.SaveImg(logo);
+                var fileName = _brandService.SaveImg(createBrandVM.Logo);
 
                 if(fileName is not null)
                 {
@@ -77,25 +89,33 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Update(Brand brand, IFormFile? logo) // string name, string Description, bool status
+        public IActionResult Update(UpdateBrandVM updateBrandVM) 
         {
-            var brandInDb = _context.Brands.AsNoTracking().SingleOrDefault(e => e.Id == brand.Id);
+            if (!ModelState.IsValid)
+                return View(new Brand()
+                {
+                    Name = updateBrandVM.Name,
+                    Description = updateBrandVM.Description,
+                    Status = updateBrandVM.Status
+                });
 
-            if (brandInDb is null) return NotFound();
+            var brand = _context.Brands.SingleOrDefault(e => e.Id == updateBrandVM.Id);
 
-            if(logo is not null && logo.Length > 0)
+            if (brand is null) return NotFound();
+
+            if(updateBrandVM.Logo is not null && updateBrandVM.Logo.Length > 0)
             {
                 // Save new Logo in wwwroot
-                var fileName = _brandService.SaveImg(logo);
+                var fileName = _brandService.SaveImg(updateBrandVM.Logo);
 
                 // Remove old Logo from wwwroot
-                _brandService.RemoveImg(brandInDb.Logo);
+                _brandService.RemoveImg(brand.Logo);
 
                 // Save new Logo in DB
                 if (fileName is not null) brand.Logo = fileName;
             }
             else
-                brand.Logo = brandInDb.Logo;
+                brand.Logo = brand.Logo;
 
             _context.Brands.Update(brand);
             _context.SaveChanges();
