@@ -10,7 +10,8 @@
             <h2 class="display-6">All Categories</h2>
         </div>
         <div class="col-md-6 text-md-end text-start mt-2 mt-md-0">
-            <a href="/Admin/Category/Create" class="btn btn-success"><i class="bi bi-plus-circle"></i> Create</a>
+            @* <a href="/Admin/Category/Create" class="btn btn-success"><i class="bi bi-plus-circle"></i> Create</a> *@
+            <a asp-action="Create" class="btn btn-success"><i class="bi bi-plus-circle"></i> Create</a>
         </div>
     </div>
 
@@ -64,6 +65,9 @@
                             }
                             <td>
                                 <a href="/Admin/Category/Update/@item.Id" type="button" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a>
+
+                                @* <a asp-action="Update" asp-route-id="@item.Id" type="button" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a> *@
+
                                 <a href="/Admin/Category/Delete/@item.Id" class="btn btn-danger btn-delete"><i class="bi bi-trash"></i> Delete</a>
                             </td>
                         </tr>

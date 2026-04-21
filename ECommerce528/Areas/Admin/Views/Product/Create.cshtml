@@ -38,6 +38,7 @@
                             <option value="@item.Id">@item.Name</option>
                         }
                     </select>
+                    @* <select asp-for="Product.CategoryId" class="form-select" asp-items="@Model.NewCategories"></select> *@
                 </div>
 
                 <div class="mb-3">
@@ -47,7 +48,8 @@
                         {
                             <option value="@item.Id">@item.Name</option>
                         }
-                    </select>
+                    </select> 
+                    @* <select asp-for="Product.BrandId" class="form-select" asp-items="@Model.NewBrands"></select> *@
                 </div>
 
                 <div class="mb-3">

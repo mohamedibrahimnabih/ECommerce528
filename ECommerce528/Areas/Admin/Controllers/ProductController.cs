@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -75,10 +76,24 @@ namespace ECommerce528.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            //return View(new UpsertProductVM()
+            //{
+            //    NewCategories = _context.Categories.AsEnumerable().Select(e=>new SelectListItem()
+            //    {
+            //        Text = e.Name,
+            //        Value = e.Id.ToString()
+            //    }),
+            //    NewBrands = _context.Brands.AsEnumerable().Select(e => new SelectListItem()
+            //    {
+            //        Text = e.Name,
+            //        Value = e.Id.ToString()
+            //    }),
+            //});
+
             return View(new UpsertProductVM()
             {
                 Categories = _context.Categories.AsEnumerable(),
-                Brands = _context.Brands.AsEnumerable(),
+                Brands = _context.Brands.AsEnumerable()
             });
         }
 

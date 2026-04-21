@@ -36,12 +36,17 @@ namespace ECommerce528.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return View(new Category());
         }
 
         [HttpPost]
         public IActionResult Create(Category category) // string name, string Description, bool status
         {
+            //if(category.Name is not null && category.Name.Length > 100 && category.Name.Length < 3)
+
+            if(!ModelState.IsValid)
+                return View(category);
+
             _context.Categories.Add(category);
             _context.SaveChanges();
 
@@ -71,6 +76,9 @@ namespace ECommerce528.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult Update(Category category) // string name, string Description, bool status
         {
+            if (!ModelState.IsValid)
+                return View(category);
+
             _context.Categories.Update(category);
             _context.SaveChanges();
 

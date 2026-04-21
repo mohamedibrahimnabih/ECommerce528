@@ -1,4 +1,6 @@
-﻿namespace ECommerce528.ViewModels
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace ECommerce528.ViewModels
 {
     public class UpsertProductVM
     {
@@ -7,5 +9,8 @@
 
         public IEnumerable<Category> Categories { get; set; } = [];
         public IEnumerable<Brand> Brands { get; set; } = [];
+
+        public IEnumerable<SelectListItem> NewCategories { get; set; } = [];
+        public IEnumerable<SelectListItem> NewBrands { get; set; } = [];
     }
 }
