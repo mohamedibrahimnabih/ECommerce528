@@ -1,27 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace ECommerce528.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
     public class BrandController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        //private readonly ApplicationDbContext _context;
         private readonly BrandService _brandService;
+        private readonly IRepository<Brand> _brandRepository;
 
-        public BrandController()
+        public BrandController(IRepository<Brand> brandRepository)
         {
-            _context = new();
+            //_context = new();
+            _brandRepository = brandRepository;
             _brandService = new();
         }
 
-        public IActionResult Index(int page = 1, string? query = null)
+        public async Task<IActionResult> Index(int page = 1, string? query = null, CancellationToken cancellationToken = default)
         {
-            var brands = _context.Brands.AsQueryable();
+            //var brands = _context.Brands.AsQueryable();
+            var brands = await _brandRepository.GetAsync(cancellationToken: cancellationToken);
 
             // Filter
-            if(query is not null)
+            if (query is not null)
                 brands = brands.Where(e => e.Name.ToLower().Contains(query.ToLower().Trim()));
 
             // Pagination
@@ -44,7 +45,7 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CreateBrandVM createBrandVM) 
+        public async Task<IActionResult> Create(CreateBrandVM createBrandVM, CancellationToken cancellationToken = default) 
         {
             //ModelState.Remove("logo");
 
@@ -70,8 +71,8 @@ namespace ECommerce528.Areas.Admin.Controllers
                 }
             }
 
-            _context.Brands.Add(brand);
-            _context.SaveChanges();
+            await _brandRepository.CreateAsync(brand, cancellationToken);
+            await _brandRepository.CommitAsync(cancellationToken);
 
             TempData["success_notification"] = "Add Brand Successfully";
 
@@ -79,9 +80,10 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public IActionResult Update(int id)
+        public async Task<IActionResult> Update(int id, CancellationToken cancellationToken = default)
         {
-            var brand = _context.Brands.SingleOrDefault(e => e.Id == id);
+            //var brand = _context.Brands.SingleOrDefault(e => e.Id == id);
+            var brand = await _brandRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
 
             if (brand is null) return NotFound();
 
@@ -89,7 +91,7 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public IActionResult Update(UpdateBrandVM updateBrandVM) 
+        public async Task<IActionResult> Update(UpdateBrandVM updateBrandVM, CancellationToken cancellationToken = default) 
         {
             if (!ModelState.IsValid)
                 return View(new Brand()
@@ -99,7 +101,9 @@ namespace ECommerce528.Areas.Admin.Controllers
                     Status = updateBrandVM.Status
                 });
 
-            var brand = _context.Brands.SingleOrDefault(e => e.Id == updateBrandVM.Id);
+            //var brand = _context.Brands.SingleOrDefault(e => e.Id == updateBrandVM.Id);
+            var brand = await _brandRepository.GetOneAsync(e => e.Id == updateBrandVM.Id, 
+                cancellationToken: cancellationToken);
 
             if (brand is null) return NotFound();
 
@@ -117,25 +121,27 @@ namespace ECommerce528.Areas.Admin.Controllers
             else
                 brand.Logo = brand.Logo;
 
-            _context.Brands.Update(brand);
-            _context.SaveChanges();
+            _brandRepository.Update(brand);
+            await _brandRepository.CommitAsync(cancellationToken);
 
             TempData["success_notification"] = "Update Brand Successfully";
 
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
         {
-            var brand = _context.Brands.SingleOrDefault(e => e.Id == id);
-            
+            //var brand = _context.Brands.SingleOrDefault(e => e.Id == id);
+            var brand = await _brandRepository.GetOneAsync(e => e.Id == id,
+                cancellationToken: cancellationToken);
+
             if (brand is null) return NotFound();
 
             // Remove old Logo from wwwroot
             _brandService.RemoveImg(brand.Logo);
 
-            _context.Brands.Remove(brand);
-            _context.SaveChanges();
+            _brandRepository.Delete(brand);
+            await _brandRepository.CommitAsync(cancellationToken);
 
             TempData["success_notification"] = "Remove Brand Successfully";
 

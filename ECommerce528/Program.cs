@@ -9,6 +9,12 @@ namespace ECommerce528
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
+            builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
+            builder.Services.AddScoped<IRepository<Brand>, Repository<Brand>>();
+            builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
+            builder.Services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();
+
             builder.Services.AddSession(options =>
             {
                 options.Cookie.Name = ".AdventureWorks.Session";
