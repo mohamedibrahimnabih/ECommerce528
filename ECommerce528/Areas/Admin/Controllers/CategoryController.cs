@@ -15,7 +15,7 @@ namespace ECommerce528.Areas.Admin.Controllers
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<IActionResult> Index(IRepository<Category> categoryRepository, int page = 1, string? query = null, CancellationToken cancellationToken = default)
+        public async Task<IActionResult> Index(int page = 1, string? query = null, CancellationToken cancellationToken = default)
         {
             //var categories = _context.Categories.AsQueryable();
             var categories = await _categoryRepository.GetAsync(cancellationToken: cancellationToken);
