@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace ECommerce528
 {
     public class Program
@@ -8,6 +10,16 @@ namespace ECommerce528
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            var connectionString =
+                    builder.Configuration.GetConnectionString("DefaultConnection")
+                        ?? throw new InvalidOperationException("Connection string"
+                        + "'DefaultConnection' not found.");
+
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
@@ -35,6 +47,7 @@ namespace ECommerce528
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSession();
