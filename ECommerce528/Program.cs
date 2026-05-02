@@ -1,3 +1,6 @@
+using ECommerce528.Services.IServices;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce528
@@ -21,11 +24,24 @@ namespace ECommerce528
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.User.RequireUniqueEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.Lockout.MaxFailedAccessAttempts = 6;
+            })
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            builder.Services.AddTransient<IEmailSender, EmailSender>();
+
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
             builder.Services.AddScoped<IRepository<Brand>, Repository<Brand>>();
             builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
             builder.Services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();
+            builder.Services.AddScoped<IAccountService, AccountService>();
 
             builder.Services.AddSession(options =>
             {

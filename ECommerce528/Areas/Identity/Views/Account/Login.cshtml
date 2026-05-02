@@ -1,0 +1,49 @@
+﻿@model ECommerce528.ViewModels.LoginVM
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container my-3">
+    <h1>Login</h1>
+
+    <h4>LoginVM</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-12">
+            <form asp-action="Login">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="EmailORUserName" class="control-label"></label>
+                    <input asp-for="EmailORUserName" class="form-control" />
+                    <span asp-validation-for="EmailORUserName" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="RememberMe" /> @Html.DisplayNameFor(model => model.RememberMe)
+                    </label>
+                </div>
+                <div class="form-group mt-3">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div>
+        <a asp-action="Register">Register</a>
+    </div>
+    <div>
+        <a asp-action="ResendEmailConfirmation">Resend Email Confirmation</a>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_NotificationPartial" />
+}

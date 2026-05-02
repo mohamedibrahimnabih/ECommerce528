@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ECommerce528.ViewModels;
 
 namespace ECommerce528.DataAccess
 {
@@ -36,5 +37,8 @@ namespace ECommerce528.DataAccess
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductTypeConfiguration).Assembly);
         }
+        public DbSet<ECommerce528.ViewModels.RegisterVM> RegisterVM { get; set; } = default!;
+        public DbSet<ECommerce528.ViewModels.LoginVM> LoginVM { get; set; } = default!;
+        public DbSet<ECommerce528.ViewModels.ResendEmailConfirmationVM> ResendEmailConfirmationVM { get; set; } = default!;
     }
 }
