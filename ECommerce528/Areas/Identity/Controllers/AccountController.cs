@@ -14,13 +14,15 @@ namespace ECommerce528.Areas.Identity.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly IAccountService _accountService;
+        private readonly IRepository<ApplicationUserOTP> _applicationUserOTPRepository;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IAccountService accountService)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, IAccountService accountService, IRepository<ApplicationUserOTP> applicationUserOTPRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _accountService = accountService;
+            _applicationUserOTPRepository = applicationUserOTPRepository;
         }
 
         // Service Layer of application User => UserManager<ApplicationUser>
@@ -28,6 +30,17 @@ namespace ECommerce528.Areas.Identity.Controllers
 
         // Service Layer of identity Role => RoleManager<IdentityUser>
         // Repo Layer of identity Role => RoleStore<ApplicationUser>
+
+
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction(nameof(Login));
+        }
 
         [HttpGet]
         public IActionResult Register()
@@ -67,6 +80,8 @@ namespace ECommerce528.Areas.Identity.Controllers
 
             // Send Email Confirmation
             await _accountService.SendMailAsync(user, Url, Request);
+
+            await _userManager.AddToRoleAsync(user, RoleNames.CUSTOMER);
 
             TempData["success_notification"] = "Add Account Successfully, check you email";
 
@@ -177,19 +192,105 @@ namespace ECommerce528.Areas.Identity.Controllers
             return RedirectToAction(nameof(Login));
         }
 
-        //public IActionResult ForgetPassword()
-        //{
-        //    return View();
-        //}
+        [HttpGet]
+        public IActionResult ForgetPassword()
+        {
+            return View();
+        }
 
-        //public IActionResult ResetPassword()
-        //{
-        //    return View();
-        //}
+        [HttpPost]
+        public async Task<IActionResult> ForgetPassword(ForgetPasswordVM forgetPasswordVM)
+        {
+            if (!ModelState.IsValid)
+                return View(forgetPasswordVM);
 
-        //public IActionResult ValidOTP()
-        //{
-        //    return View();
-        //}
+            var user = await _userManager.FindByEmailAsync(forgetPasswordVM.EmailORUserName) ?? await _userManager.FindByNameAsync(forgetPasswordVM.EmailORUserName);
+
+            if(user is not null)
+            {
+                await _accountService.SendMailAsync(user, Url, Request, EmailType.ForgetPassword);
+            }
+
+            TempData["success_notification"] = "Send OTP number successfully, Please check your email";
+            TempData["userId"] = user?.Id;
+
+            return RedirectToAction(nameof(ValidateOTP));
+        }
+
+        [HttpGet]
+        public IActionResult ValidateOTP()
+        {
+            if(TempData.Peek("userId") is null)
+                return NotFound();
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ValidateOTP(VlidateOTPVM vlidateOTPVM)
+        {
+            if (!ModelState.IsValid)
+                return View(vlidateOTPVM);
+
+            //if(!TempData.ContainsKey("userId"))
+            //    return NotFound();
+
+            var userId = TempData.Peek("userId")?.ToString();
+
+            if (userId is null) return NotFound();
+
+            //var totalOTPs = (await _applicationUserOTPRepository.GetAsync(e => e.ApplicationUserId == userId && (DateTime.Now - e.CreateAt).TotalHours < 24)).Count();
+
+            //if(totalOTPs > 5)
+            //{
+            //    TempData["error_notification"] = "You have exceeded the maximum number of OTP requests. Please try again later.";
+            //    return RedirectToAction(nameof(ForgetPassword));
+            //}
+
+            var otp = await _applicationUserOTPRepository.GetOneAsync(e => e.ApplicationUserId == userId && e.OTP == vlidateOTPVM.OTP && !e.IsUsed && e.ValidTo >= DateTime.Now);
+
+            if (otp is null)
+            {
+                ModelState.AddModelError(nameof(VlidateOTPVM.OTP), "Invalid OTP");
+                return View(vlidateOTPVM);
+            }
+
+            otp.IsUsed = true;
+            await _applicationUserOTPRepository.CommitAsync();
+
+            return RedirectToAction(nameof(NewPassword));
+        }
+
+        [HttpGet]
+        public IActionResult NewPassword()
+        {
+            if (TempData.Peek("userId") is null)
+                return NotFound();
+
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> NewPassword(NewPasswordVM newPasswordVM)
+        {
+            if (!ModelState.IsValid)
+                return View(newPasswordVM);
+
+            var userId = TempData.Peek("userId")?.ToString();
+
+            if (userId is null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null) return NotFound();
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            await _userManager.ResetPasswordAsync(user, token, newPasswordVM.Password);
+
+            TempData["success_notification"] = "Change Password Successfully";
+            TempData["userId"] = null;
+
+            return RedirectToAction(nameof(Login));
+        }
     }
 }

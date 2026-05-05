@@ -23,6 +23,7 @@ namespace ECommerce528.DataAccess
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
+        public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
@@ -37,8 +38,5 @@ namespace ECommerce528.DataAccess
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProductTypeConfiguration).Assembly);
         }
-        public DbSet<ECommerce528.ViewModels.RegisterVM> RegisterVM { get; set; } = default!;
-        public DbSet<ECommerce528.ViewModels.LoginVM> LoginVM { get; set; } = default!;
-        public DbSet<ECommerce528.ViewModels.ResendEmailConfirmationVM> ResendEmailConfirmationVM { get; set; } = default!;
     }
 }

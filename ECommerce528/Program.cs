@@ -1,4 +1,5 @@
 using ECommerce528.Services.IServices;
+using ECommerce528.Utilities.DbInitializers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -34,14 +35,23 @@ namespace ECommerce528
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
             builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
             builder.Services.AddScoped<IRepository<Brand>, Repository<Brand>>();
             builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
+            builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
             builder.Services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();
             builder.Services.AddScoped<IAccountService, AccountService>();
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
             builder.Services.AddSession(options =>
             {
@@ -51,6 +61,10 @@ namespace ECommerce528
             });
 
             var app = builder.Build();
+
+            var scope = app.Services.CreateScope();
+            var service = scope.ServiceProvider.GetService<IDbInitializer>();
+            service.Initialize();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerce528.Areas.Admin.Controllers
 {
     [Area(SD.ADMIN_AREA)]
+    [Authorize(Roles = $"{RoleNames.SUPER_ADMIN},{RoleNames.ADMIN},{RoleNames.EMPLOYEE}")]
     public class CategoryController : Controller
     {
         //private readonly ApplicationDbContext _context;
@@ -38,12 +40,14 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = $"{RoleNames.SUPER_ADMIN},{RoleNames.ADMIN}")]
         public IActionResult Create()
         {
             return View(new Category());
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{RoleNames.SUPER_ADMIN},{RoleNames.ADMIN}")]
         public async Task<IActionResult> Create(Category category, CancellationToken cancellationToken = default) // string name, string Description, bool status
         {
             //if(category.Name is not null && category.Name.Length > 100 && category.Name.Length < 3)
@@ -71,6 +75,7 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = $"{RoleNames.SUPER_ADMIN},{RoleNames.ADMIN}")]
         public async Task<IActionResult> Update(int id, CancellationToken cancellationToken = default)
         {
             //var category = _context.Categories.SingleOrDefault(e => e.Id == id);
@@ -82,6 +87,7 @@ namespace ECommerce528.Areas.Admin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{RoleNames.SUPER_ADMIN},{RoleNames.ADMIN}")]
         public async Task<IActionResult> Update(Category category, CancellationToken cancellationToken = default) // string name, string Description, bool status
         {
             if (!ModelState.IsValid)
@@ -95,6 +101,7 @@ namespace ECommerce528.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [Authorize(Roles = $"{RoleNames.SUPER_ADMIN},{RoleNames.ADMIN}")]
         public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
         {
             var category = await _categoryRepository.GetOneAsync(e => e.Id == id, cancellationToken: cancellationToken);
