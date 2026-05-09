@@ -44,14 +44,7 @@ namespace ECommerce528
 
             builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-            builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
-            builder.Services.AddScoped<IRepository<Category>, Repository<Category>>();
-            builder.Services.AddScoped<IRepository<Brand>, Repository<Brand>>();
-            builder.Services.AddScoped<IRepository<Product>, Repository<Product>>();
-            builder.Services.AddScoped<IRepository<ApplicationUserOTP>, Repository<ApplicationUserOTP>>();
-            builder.Services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();
-            builder.Services.AddScoped<IAccountService, AccountService>();
-            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.Configure();
 
             builder.Services.AddSession(options =>
             {

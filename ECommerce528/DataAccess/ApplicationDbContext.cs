@@ -24,6 +24,10 @@ namespace ECommerce528.DataAccess
         public DbSet<Brand> Brands { get; set; }
         public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<ApplicationUserOTP> ApplicationUserOTPs { get; set; }
+        public DbSet<Cart> Carts { get; set; }
+        public DbSet<FavoriteItem> FavoriteItems { get; set; }
+        public DbSet<ProductPromotion> ProductPromotions { get; set; }
+        public DbSet<PromotionUserUsage> PromotionUserUsages { get; set; }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
