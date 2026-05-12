@@ -1,0 +1,298 @@
+﻿@{
+    ViewData["Title"] = "Order Confirmed";
+    Layout = "_Layout";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+    :root {
+        --ink: #1a1a18;
+        --paper: #faf8f4;
+        --accent: #c8a96e;
+        --accent-dark: #a6873d;
+        --muted: #8a8880;
+        --line: #e5e2db;
+        --success-green: #3d7a5e;
+    }
+
+    .success-page {
+        min-height: 80vh;
+        background-color: var(--paper);
+        font-family: 'DM Sans', sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 1.5rem;
+    }
+
+    .success-card {
+        max-width: 560px;
+        width: 100%;
+        background: #fff;
+        border: 1px solid var(--line);
+        padding: 3.5rem 3rem;
+        position: relative;
+        overflow: hidden;
+        animation: riseIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @@keyframes riseIn {
+        from { opacity: 0; transform: translateY(24px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* decorative corner rule */
+    .success-card::before,
+    .success-card::after {
+        content: '';
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-color: var(--accent);
+        border-style: solid;
+    }
+    .success-card::before { top: 16px; left: 16px; border-width: 1px 0 0 1px; }
+    .success-card::after  { bottom: 16px; right: 16px; border-width: 0 1px 1px 0; }
+
+    /* stamp icon */
+    .stamp-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .stamp {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--success-green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: popIn 0.5s 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    }
+
+    @@keyframes popIn {
+        from { transform: scale(0); opacity: 0; }
+        to   { transform: scale(1); opacity: 1; }
+    }
+
+    .stamp svg {
+        width: 36px;
+        height: 36px;
+        stroke: #fff;
+        stroke-width: 2.5;
+        fill: none;
+        stroke-dasharray: 60;
+        stroke-dashoffset: 60;
+        animation: draw 0.45s 0.8s ease forwards;
+    }
+
+    @@keyframes draw {
+        to { stroke-dashoffset: 0; }
+    }
+
+    .eyebrow {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent-dark);
+        text-align: center;
+        margin-bottom: 0.6rem;
+        animation: fadeUp 0.5s 0.4s ease both;
+    }
+
+    .heading {
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: 2.2rem;
+        color: var(--ink);
+        text-align: center;
+        line-height: 1.15;
+        margin: 0 0 0.75rem;
+        animation: fadeUp 0.5s 0.5s ease both;
+    }
+
+    .subtext {
+        font-size: 0.92rem;
+        color: var(--muted);
+        text-align: center;
+        line-height: 1.65;
+        margin: 0 0 2.25rem;
+        animation: fadeUp 0.5s 0.55s ease both;
+    }
+
+    @@keyframes fadeUp {
+        from { opacity: 0; transform: translateY(12px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* divider */
+    .divider {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 0 0 2rem;
+        animation: fadeUp 0.4s 0.6s ease both;
+    }
+
+    /* info rows */
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0.45rem 0;
+        border-bottom: 1px dashed var(--line);
+        font-size: 0.875rem;
+        animation: fadeUp 0.4s ease both;
+    }
+
+    .info-row:last-of-type { border-bottom: none; }
+
+    .info-row:nth-child(1) { animation-delay: 0.65s; }
+    .info-row:nth-child(2) { animation-delay: 0.72s; }
+    .info-row:nth-child(3) { animation-delay: 0.79s; }
+
+    .info-label {
+        color: var(--muted);
+        font-weight: 400;
+    }
+
+    .info-value {
+        color: var(--ink);
+        font-weight: 500;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: #eaf5ef;
+        color: var(--success-green);
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.2rem 0.65rem;
+        border-radius: 999px;
+    }
+
+    .badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--success-green);
+        display: block;
+    }
+
+    /* CTA */
+    .cta-wrap {
+        margin-top: 2.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        animation: fadeUp 0.4s 0.85s ease both;
+    }
+
+    .btn-primary {
+        display: block;
+        text-align: center;
+        background: var(--ink);
+        color: #fff;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        padding: 0.85rem 1.5rem;
+        text-decoration: none;
+        transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-primary:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-ghost {
+        display: block;
+        text-align: center;
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.82rem;
+        padding: 0.5rem;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .btn-ghost:hover {
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    .note {
+        margin-top: 2rem;
+        padding: 1rem 1.1rem;
+        background: #fdf9f0;
+        border-left: 3px solid var(--accent);
+        font-size: 0.82rem;
+        color: var(--muted);
+        line-height: 1.6;
+        animation: fadeUp 0.4s 0.9s ease both;
+    }
+</style>
+
+<div class="success-page">
+    <div class="success-card">
+
+        <div class="stamp-wrap">
+            <div class="stamp">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+        </div>
+
+        <p class="eyebrow">Order Confirmed</p>
+        <h1 class="heading">Thank you for<br><em>your purchase</em></h1>
+        <p class="subtext">
+            Your order has been placed successfully and is now<br>
+            being prepared for processing.
+        </p>
+
+        <hr class="divider" />
+
+        <div class="info-row">
+            <span class="info-label">Order Status</span>
+            <span class="info-value">
+                <span class="badge">In Processing</span>
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Payment</span>
+            <span class="info-value">
+                <span class="badge">Completed</span>
+            </span>s
+        </div>
+        <div class="info-row">
+            <span class="info-label">Confirmation sent to</span>
+            <span class="info-value">@User.Identity?.Name</span>
+        </div>
+
+        <div class="note">
+            A confirmation summary has been recorded. You will be notified when your order ships.
+        </div>
+
+        <div class="cta-wrap">
+            <a asp-controller="Order" asp-action="Index" class="btn-primary">
+                View My Orders
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="btn-ghost">
+                ← Continue Shopping
+            </a>
+        </div>
+
+    </div>
+</div>

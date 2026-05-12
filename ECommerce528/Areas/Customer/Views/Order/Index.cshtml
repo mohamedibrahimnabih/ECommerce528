@@ -1,0 +1,213 @@
+﻿@model ECommerce528.ViewModels.OrderWithRelatedVM
+@using ECommerce528.Models
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container py-5">
+
+    @* ── Page Header ── *@
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h2 class="fw-bold mb-0" style="letter-spacing: -0.5px;">My Orders</h2>
+            <p class="text-muted small mb-0">Track and manage your order history</p>
+        </div>
+    </div>
+
+    @* ── Search Bar ── *@
+    <form method="get" asp-action="Index" class="mb-4">
+        <div class="input-group shadow-sm" style="max-width: 420px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text"
+                   name="query"
+                   value="@Model.Query"
+                   class="form-control border-start-0 ps-0"
+                   placeholder="Search by carrier name…" />
+            <button class="btn btn-dark px-4" type="submit">Search</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Query))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+            }
+        </div>
+    </form>
+
+    @* ── Empty State ── *@
+    @if (!Model.Orders.Any())
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
+            <p class="text-muted">No orders found.</p>
+        </div>
+    }
+    else
+    {
+        @* ── Table ── *@
+        <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col" class="ps-4">#</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Payment</th>
+                            <th scope="col">Payment Status</th>
+                            <th scope="col">Order Status</th>
+                            <th scope="col">Carrier</th>
+                            <th scope="col">Tracking #</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model.Orders)
+                        {
+                            <tr>
+                                @* ID *@
+                                <td class="ps-4 fw-semibold text-muted">#@order.Id</td>
+
+                                @* Date *@
+                                <td>
+                                    <span class="d-block">@order.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                    <small class="text-muted">@order.CreatedAt.ToString("hh:mm tt")</small>
+                                </td>
+
+                                @* Total *@
+                                <td class="fw-semibold">$@order.TotalPrice.ToString("F2")</td>
+
+                                @* Payment Method *@
+                                <td>
+                                    @if (order.PaymentMethod == PaymentMethod.Visa)
+                                    {
+                                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                            <i class="bi bi-credit-card me-1"></i>Visa
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                            <i class="bi bi-cash-coin me-1"></i>COD
+                                        </span>
+                                    }
+                                </td>
+
+                                @* Payment Status *@
+                                <td>
+                                    @{
+                                        var (payBg, payText, payIcon) = order.PaymentStatus switch
+                                        {
+                                            PaymentStatus.Completed => ("success", "success", "bi-check-circle"),
+                                            PaymentStatus.Refunded => ("warning", "warning", "bi-arrow-counterclockwise"),
+                                            _ => ("secondary", "secondary", "bi-hourglass-split"),
+                                        };
+                                    }
+                                    <span class="badge rounded-pill bg-@payBg bg-opacity-10 text-@payText border border-@payBg border-opacity-25">
+                                        <i class="bi @payIcon me-1"></i>@order.PaymentStatus
+                                    </span>
+                                </td>
+
+                                @* Order Status *@
+                                <td>
+                                    @{
+                                        var (ordBg, ordText, ordIcon) = order.OrderStatus switch
+                                        {
+                                            OrderStatus.Pending => ("secondary", "secondary", "bi-clock"),
+                                            OrderStatus.InProcessing => ("info", "info", "bi-gear"),
+                                            OrderStatus.Shipped => ("primary", "primary", "bi-box-seam"),
+                                            OrderStatus.OnWay => ("warning", "warning", "bi-truck"),
+                                            OrderStatus.Completed => ("success", "success", "bi-check2-all"),
+                                            OrderStatus.Canceled => ("danger", "danger", "bi-x-circle"),
+                                            _ => ("secondary", "secondary", "bi-question"),
+                                        };
+                                    }
+                                    <span class="badge rounded-pill bg-@ordBg bg-opacity-10 text-@ordText border border-@ordBg border-opacity-25">
+                                        <i class="bi @ordIcon me-1"></i>@order.OrderStatus
+                                    </span>
+                                </td>
+
+                                @* Carrier *@
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(order.CarrierName))
+                                    {
+                                        @order.CarrierName
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">—</span>
+                                    }
+                                </td>
+
+                                @* Tracking Number *@
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(order.TrackingNumber))
+                                    {
+                                        <code class="bg-light px-2 py-1 rounded small">@order.TrackingNumber</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">—</span>
+                                    }
+                                </td>
+
+                                @* Actions *@
+                                <td class="text-center">
+                                    <a asp-action="Details" asp-route-id="@order.Id"
+                                           class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                        <i class="bi bi-eye me-1"></i>View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @* ── Pagination ── *@
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Orders pagination" class="mt-4 d-flex justify-content-center">
+                <ul class="pagination pagination-sm mb-0">
+
+                    @* Previous *@
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link rounded-start-pill px-3"
+                               asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage - 1)"
+                               asp-route-query="@Model.Query">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link px-3"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-query="@Model.Query">@i</a>
+                        </li>
+                    }
+
+                    @* Next *@
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link rounded-end-pill px-3"
+                               asp-action="Index"
+                               asp-route-page="@(Model.CurrentPage + 1)"
+                               asp-route-query="@Model.Query">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+
+            <p class="text-center text-muted small mt-2">
+                Page @Model.CurrentPage of @Model.TotalPages
+            </p>
+        }
+    }
+
+</div>

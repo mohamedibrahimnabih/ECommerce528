@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
+using Stripe.Checkout;
 using System.Linq.Expressions;
+using Product = ECommerce528.Models.Product;
 
 namespace ECommerce528.Areas.Customer.Controllers
 {
@@ -15,6 +18,8 @@ namespace ECommerce528.Areas.Customer.Controllers
         private readonly IRepository<PromotionUserUsage> _promotionsUserUsageRepository;
         private readonly ApplicationDbContext _applicationDbContext;
         private readonly ILogger<CartController> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<ProductPromotion> _promotionPromotionRepository;
 
         public CartController(UserManager<ApplicationUser> userManager, 
@@ -23,7 +28,9 @@ namespace ECommerce528.Areas.Customer.Controllers
             IRepository<ProductPromotion> promotionPromotionRepository,
             IRepository<PromotionUserUsage> promotionsUserUsageRepository,
             ApplicationDbContext applicationDbContext,
-            ILogger<CartController> logger
+            ILogger<CartController> logger,
+            IConfiguration configuration,
+            IRepository<Order> orderRepository
             )
         {
             _userManager = userManager;
@@ -32,6 +39,8 @@ namespace ECommerce528.Areas.Customer.Controllers
             _promotionsUserUsageRepository = promotionsUserUsageRepository;
             _applicationDbContext = applicationDbContext;
             _logger = logger;
+            _configuration = configuration;
+            _orderRepository = orderRepository;
             _promotionPromotionRepository = promotionPromotionRepository;
         }
 
@@ -191,9 +200,62 @@ namespace ECommerce528.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        public IActionResult Pay()
+        public async Task<IActionResult> Pay()
         {
-            return View();
+            //StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user is null) return NotFound();
+
+            var userCart = await _cartRepository
+                .GetAsync(e => e.ApplicationuserId == user.Id, includes: [e => e.Product]);
+
+            var orderInDb = await _orderRepository.GetOneAsync(e => e.ApplicationUserId == user.Id && e.OrderStatus == OrderStatus.Pending);
+            Order order = new();
+
+            if (orderInDb == null)
+            {
+                order.ApplicationUserId = user.Id;
+                order.TotalPrice = (decimal)userCart.Sum(e => e.ProductPrice * e.Quantity);
+
+                await _orderRepository.CreateAsync(order);
+                await _orderRepository.CommitAsync();
+            }
+
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<SessionLineItemOptions>(),
+                Mode = "payment",
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/customer/checkout/success?orderId={orderInDb?.Id ?? order.Id}",
+                CancelUrl = $"{Request.Scheme}://{Request.Host}/customer/checkout/cancel",
+            };
+
+            foreach (var item in userCart)
+            {
+                options.LineItems.Add(new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        Currency = "egp",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = item.Product.Name,
+                            Description = item.Product.Description,
+                        },
+                        UnitAmount = (long)item.ProductPrice * 100,
+                    },
+                    Quantity = item.Quantity,
+                });
+            }
+
+            var service = new SessionService();
+            var session = service.Create(options);
+            order.SessionId = session.Id;
+            await _orderRepository.CommitAsync();
+
+            return Redirect(session.Url);
         }
     }
 }

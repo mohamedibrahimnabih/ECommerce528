@@ -18,6 +18,9 @@ namespace ECommerce528
             services.AddScoped<IRepository<PromotionUserUsage>, Repository<PromotionUserUsage>>();
             services.AddScoped<IProductSubImgRepository, ProductSubImgRepository>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IRepository<Order>, Repository<Order>>();
+            services.AddScoped<IRepository<OrderItem>, Repository<OrderItem>>();
+            services.AddScoped<IRepository<Review>, Repository<Review>>();
             services.AddScoped<IDbInitializer, DbInitializer>();
         }
     }

@@ -121,7 +121,11 @@ namespace ECommerce528.Areas.Admin.Controllers
             else
                 brand.Logo = brand.Logo;
 
-            _brandRepository.Update(brand);
+            brand.Name = updateBrandVM.Name;
+            brand.Description = updateBrandVM.Description;
+            brand.Status = updateBrandVM.Status;
+
+            //_brandRepository.Update(brand);
             await _brandRepository.CommitAsync(cancellationToken);
 
             TempData["success_notification"] = "Update Brand Successfully";

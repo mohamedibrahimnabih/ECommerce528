@@ -3,6 +3,7 @@ using ECommerce528.Utilities.DbInitializers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 namespace ECommerce528
 {
@@ -52,6 +53,9 @@ namespace ECommerce528
                 options.IdleTimeout = TimeSpan.FromSeconds(10);
                 options.Cookie.IsEssential = true;
             });
+
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+            StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
             var app = builder.Build();
 

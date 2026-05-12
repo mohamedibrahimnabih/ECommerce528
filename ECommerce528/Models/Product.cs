@@ -15,5 +15,6 @@
         public Category Category { get; set; } = null!;
         public int BrandId { get; set; }
         public Brand Brand { get; set; } = null!;
+        //public string? Currency { get; set; }
     }
 }
